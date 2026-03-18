@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ECHO</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23001122'/%3E%3Ccircle cx='50' cy='50' r='6' fill='%2300ff88'/%3E%3Ccircle cx='50' cy='50' r='18' fill='none' stroke='%2300ff88' stroke-width='2'/%3E%3Ccircle cx='50' cy='50' r='32' fill='none' stroke='%2300ff88' stroke-width='1.5' opacity='0.7'/%3E%3Ccircle cx='50' cy='50' r='45' fill='none' stroke='%2300ff88' stroke-width='1' opacity='0.4'/%3E%3C/svg%3E">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        body {
+            background: #000510;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+        
+        #gameContainer {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            max-height: 600px;
+            background: #001122;
+            border-radius: 12px;
+            border: 2px solid #003344;
+            padding: 12px;
+            box-shadow: 
+                0 0 60px rgba(0,255,136,0.1),
+                inset 0 0 80px rgba(0,0,0,0.5);
+        }
+        
+        #screen {
+            width: 100%;
+            height: 100%;
+            background: #000d1a;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+        }
+        
+        #screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0,255,136,0.03) 0px,
+                rgba(0,255,136,0.03) 1px,
+                transparent 1px,
+                transparent 3px
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        #screen::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(
+                ellipse at center,
+                transparent 0%,
+                rgba(0,0,0,0.4) 70%,
+                rgba(0,0,0,0.8) 100%
+            );
+            pointer-events: none;
+            z-index: 11;
+        }
+        
+        #ui {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            display: flex;
+            justify-content: space-between;
+            color: #00ff88;
+            font-size: 11px;
+            font-weight: bold;
+            z-index: 20;
+            text-shadow: 0 0 10px rgba(0,255,136,0.8);
+            pointer-events: none;
+            letter-spacing: 2px;
+        }
+        
+        #startScreen, #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,13,26,0.95);
+            z-index: 30;
+            color: #00ff88;
+        }
+        
+        .logo {
+            width: 90px;
+            height: 90px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px rgba(0,255,136,0.6));
+        }
+        
+        h1 {
+            font-size: 32px;
+            letter-spacing: 12px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 20px rgba(0,255,136,0.8);
+            color: #00ff88;
+        }
+        
+        .blink {
+            animation: blink 1.5s infinite;
+            font-size: 12px;
+            margin-top: 30px;
+            letter-spacing: 3px;
+            color: #00cc6a;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; text-shadow: 0 0 10px rgba(0,255,136,0.8); }
+            51%, 100% { opacity: 0.3; text-shadow: none; }
+        }
+        
+        #finalScore {
+            font-size: 20px;
+            margin: 15px 0;
+            letter-spacing: 3px;
+            color: #00ff88;
+            text-shadow: 0 0 15px rgba(0,255,136,0.6);
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        #controls {
+            position: absolute;
+            bottom: 25px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 30px;
+            z-index: 25;
+            pointer-events: none;
+        }
+        
+        .control-btn {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: rgba(0,255,136,0.08);
+            border: 2px solid rgba(0,255,136,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            cursor: pointer;
+            transition: all 0.05s;
+            position: relative;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 0 20px rgba(0,255,136,0.1);
+        }
+        
+        .control-btn:active, .control-btn.active {
+            background: rgba(0,255,136,0.25);
+            transform: scale(0.9);
+            border-color: rgba(0,255,136,0.8);
+            box-shadow: 0 0 30px rgba(0,255,136,0.4);
+        }
+        
+        .control-btn::before {
+            content: '';
+            width: 0;
+            height: 0;
+            border-style: solid;
+            filter: drop-shadow(0 0 5px rgba(0,255,136,0.8));
+        }
+        
+        #btnUp::before {
+            border-width: 0 10px 16px 10px;
+            border-color: transparent transparent #00ff88 transparent;
+            margin-top: -2px;
+        }
+        
+        #btnDown::before {
+            border-width: 16px 10px 0 10px;
+            border-color: #00ff88 transparent transparent transparent;
+            margin-top: 2px;
+        }
+        
+        .control-label {
+            position: absolute;
+            bottom: -20px;
+            font-size: 8px;
+            color: #00cc6a;
+            opacity: 0.8;
+            letter-spacing: 1px;
+        }
+        
+        .instructions {
+            margin-top: 25px;
+            font-size: 10px;
+            text-align: center;
+            line-height: 2;
+            opacity: 0.7;
+            letter-spacing: 1px;
+            color: #00cc6a;
+        }
+        
+        #touchOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 100px;
+            z-index: 24;
+            display: none;
+        }
+        
+        .playing #touchOverlay {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="screen">
+            <canvas id="gameCanvas"></canvas>
+            <div id="ui">
+                <span>SKOR: <span id="score">0</span></span>
+                <span>REKOR: <span id="best">0</span></span>
+            </div>
+            <div id="touchOverlay"></div>
+            <div id="controls">
+                <div class="control-btn" id="btnUp">
+                    <span class="control-label">YUKARI</span>
+                </div>
+                <div class="control-btn" id="btnDown">
+                    <span class="control-label">AŞAĞI</span>
+                </div>
+            </div>
+            <div id="startScreen">
+                <svg class="logo" viewBox="0 0 100 100">
+                    <rect width="100" height="100" fill="#001122" rx="10"/>
+                    <circle cx="50" cy="50" r="6" fill="#00ff88"/>
+                    <circle cx="50" cy="50" r="20" fill="none" stroke="#00ff88" stroke-width="2.5"/>
+                    <circle cx="50" cy="50" r="34" fill="none" stroke="#00ff88" stroke-width="1.8" opacity="0.7"/>
+                    <circle cx="50" cy="50" r="46" fill="none" stroke="#00ff88" stroke-width="1.2" opacity="0.4"/>
+                </svg>
+                <h1>ECHO</h1>
+                <div style="font-size: 9px; opacity: 0.6; letter-spacing: 4px; color: #00cc6a;">DERİNLİK: 0m</div>
+                <div class="blink">BAŞLAMAK İÇİN DOKUN</div>
+                <div class="instructions">
+                    BUTONLARA BASILI TUT<br>
+                    SİNYALİ YÖNLENDİR<br>
+                    ENGELLERDEN KAÇIN
+                </div>
+            </div>
+            <div id="gameOverScreen" class="hidden">
+                <svg class="logo" viewBox="0 0 100 100" style="width: 50px; height: 50px; opacity: 0.4;">
+                    <circle cx="50" cy="50" r="6" fill="#00ff88"/>
+                    <circle cx="50" cy="50" r="20" fill="none" stroke="#00ff88" stroke-width="2"/>
+                    <circle cx="50" cy="50" r="34" fill="none" stroke="#00ff88" stroke-width="1.5" opacity="0.5"/>
+                </svg>
+                <h1 style="font-size: 22px; color: #ff4444; text-shadow: 0 0 20px rgba(255,68,68,0.6);">SİNYAL KAYIP</h1>
+                <div id="finalScore">SKOR: 0</div>
+                <div class="blink">TEKRAR İÇİN DOKUN</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score');
+        const bestEl = document.getElementById('best');
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const finalScoreEl = document.getElementById('finalScore');
+        const btnUp = document.getElementById('btnUp');
+        const btnDown = document.getElementById('btnDown');
+        const gameContainer = document.getElementById('gameContainer');
+
+        let gameState = 'start';
+        let score = 0;
+        let bestScore = 0;
+        
+        try {
+            bestScore = parseInt(localStorage.getItem('echo_best')) || 0;
+        } catch(e) {
+            bestScore = 0;
+        }
+        bestEl.textContent = bestScore;
+
+        function resize() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+        
+        resize();
+
+        const signal = {
+            x: 60,
+            y: 0,
+            radius: 5,
+            targetY: 0,
+            speed: 0,
+            trail: []
+        };
+
+        let obstacles = [];
+        let particles = [];
+        let frame = 0;
+        let gameSpeed = 2;
+        let currentGap = 180;
+        let lastObstacleX = 0;
+        let difficultyLevel = 0;
+        let obstaclesInCurrentLevel = 0;
+        let gridOffset = 0;
+
+        let isUpPressed = false;
+        let isDownPressed = false;
+
+        const COLOR_BG = '#000d1a';
+        const COLOR_FG = '#00ff88';
+        const COLOR_FG_DIM = '#00cc6a';
+        const COLOR_FG_FAINT = '#006644';
+        const COLOR_GRID = '#002233';
+
+        function updateDifficulty() {
+            // Her 10 engelde bir zorluk artışı
+            const targetLevel = Math.floor(score / 10);
+            
+            if (targetLevel > difficultyLevel) {
+                difficultyLevel = targetLevel;
+                gameSpeed += 0.4;
+                // Boşluk daralması
+                currentGap = Math.max(100, 180 - (difficultyLevel * 12));
+            }
+        }
+
+        function init() {
+            signal.y = canvas.height / 2;
+            signal.targetY = signal.y;
+            signal.speed = 0;
+            signal.trail = [];
+            obstacles = [];
+            particles = [];
+            score = 0;
+            frame = 0;
+            gameSpeed = 2;
+            currentGap = 180;
+            lastObstacleX = canvas.width + 100;
+            difficultyLevel = 0;
+            obstaclesInCurrentLevel = 0;
+            isUpPressed = false;
+            isDownPressed = false;
+            
+            scoreEl.textContent = '0';
+            
+            // İlk engelleri sabit aralıklarla oluştur
+            spawnObstacle(canvas.width + 100);
+            spawnObstacle(lastObstacleX + currentGap);
+            spawnObstacle(lastObstacleX + currentGap);
+        }
+
+        function spawnObstacle(x) {
+            const gapHeight = 75 + Math.random() * 35;
+            const minY = 60;
+            const maxY = canvas.height - gapHeight - 60;
+            const gapY = minY + Math.random() * (maxY - minY);
+            
+            obstacles.push({
+                x: x,
+                gapY: gapY,
+                gapHeight: gapHeight,
+                width: 16,
+                passed: false,
+                waves: []
+            });
+            
+            lastObstacleX = x;
+        }
+
+        function createParticle(x, y, type) {
+            particles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 2,
+                vy: (Math.random() - 0.5) * 2,
+                life: 20 + Math.random() * 10,
+                type: type
+            });
+        }
+
+        function update() {
+            if (gameState !== 'playing') return;
+
+            frame++;
+            gridOffset -= gameSpeed;
+
+            // Basılı tutma hareketi
+            const moveSpeed = 5;
+            if (isUpPressed) {
+                signal.targetY -= moveSpeed;
+            }
+            if (isDownPressed) {
+                signal.targetY += moveSpeed;
+            }
+
+            signal.targetY = Math.max(signal.radius + 10, Math.min(canvas.height - signal.radius - 10, signal.targetY));
+
+            const diff = signal.targetY - signal.y;
+            signal.speed += diff * 0.12;
+            signal.speed *= 0.85;
+            signal.y += signal.speed;
+
+            if (frame % 2 === 0) {
+                signal.trail.push({x: signal.x, y: signal.y, age: 0});
+            }
+            signal.trail.forEach(t => t.age++);
+            signal.trail = signal.trail.filter(t => t.age < 12);
+
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+            });
+            particles = particles.filter(p => p.life > 0);
+
+            // Obstacles
+            obstacles.forEach(obs => {
+                obs.x -= gameSpeed;
+                
+                if (frame % 8 === 0) {
+                    obs.waves.push({x: 0, width: 0, opacity: 0.8});
+                }
+                
+                obs.waves.forEach(w => {
+                    w.x -= gameSpeed;
+                    w.width += 2.5;
+                    w.opacity -= 0.04;
+                });
+                obs.waves = obs.waves.filter(w => w.opacity > 0);
+
+                if (!obs.passed) {
+                    const signalLeft = signal.x - signal.radius;
+                    const signalRight = signal.x + signal.radius;
+                    const signalTop = signal.y - signal.radius;
+                    const signalBottom = signal.y + signal.radius;
+                    
+                    const obsLeft = obs.x;
+                    const obsRight = obs.x + obs.width;
+                    const gapTop = obs.gapY;
+                    const gapBottom = obs.gapY + obs.gapHeight;
+                    
+                    if (signalRight > obsLeft && signalLeft < obsRight) {
+                        if (signalTop < gapTop || signalBottom > gapBottom) {
+                            gameOver();
+                            return;
+                        }
+                    }
+                    
+                    if (obsRight < signalLeft) {
+                        obs.passed = true;
+                        score++;
+                        obstaclesInCurrentLevel++;
+                        updateDifficulty();
+                        scoreEl.textContent = score;
+                    }
+                }
+            });
+
+            // Yeni engel spawnlama - SADECE son engel yeterince uzaklaştığında
+            const lastObs = obstacles[obstacles.length - 1];
+            if (lastObs && lastObs.x < canvas.width - currentGap + 50) {
+                spawnObstacle(canvas.width + 50);
+            }
+
+            // Ekran dışına çıkan engelleri temizle
+            obstacles = obstacles.filter(obs => obs.x > -50);
+        }
+
+        function draw() {
+            ctx.fillStyle = COLOR_BG;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Grid
+            ctx.strokeStyle = COLOR_GRID;
+            ctx.lineWidth = 1;
+            ctx.globalAlpha = 0.4;
+            
+            const gridSize = 40;
+            const offset = gridOffset % gridSize;
+            
+            for (let x = offset; x < canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            for (let y = 0; y < canvas.height; y += gridSize) {
+                ctx.globalAlpha = 0.2 + (y / canvas.height) * 0.3;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1;
+
+            // Derinlik çizgileri
+            for (let i = 0; i < 5; i++) {
+                const y = (frame * 0.5 + i * 80) % canvas.height;
+                ctx.strokeStyle = COLOR_FG_FAINT;
+                ctx.globalAlpha = 0.1 * (1 - y / canvas.height);
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1;
+
+            // Obstacles
+            obstacles.forEach(obs => {
+                obs.waves.forEach(w => {
+                    ctx.strokeStyle = COLOR_FG;
+                    ctx.globalAlpha = w.opacity * 0.5;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(obs.x + w.x, obs.gapY);
+                    ctx.lineTo(obs.x + w.x + w.width, obs.gapY);
+                    ctx.moveTo(obs.x + w.x, obs.gapY + obs.gapHeight);
+                    ctx.lineTo(obs.x + w.x + w.width, obs.gapY + obs.gapHeight);
+                    ctx.stroke();
+                });
+                ctx.globalAlpha = 1;
+
+                ctx.fillStyle = COLOR_FG;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = COLOR_FG;
+                ctx.fillRect(obs.x, 0, obs.width, obs.gapY);
+                ctx.fillRect(obs.x, obs.gapY + obs.gapHeight, obs.width, 
+                    canvas.height - obs.gapY - obs.gapHeight);
+                ctx.shadowBlur = 0;
+
+                ctx.fillStyle = COLOR_BG;
+                ctx.globalAlpha = 0.3;
+                for (let i = 4; i < obs.gapY - 4; i += 5) {
+                    if (i % 10 === 4) {
+                        ctx.fillRect(obs.x + 3, i, obs.width - 6, 2);
+                    }
+                }
+                for (let i = obs.gapY + obs.gapHeight + 4; i < canvas.height - 4; i += 5) {
+                    if (i % 10 === 4) {
+                        ctx.fillRect(obs.x + 3, i, obs.width - 6, 2);
+                    }
+                }
+                ctx.globalAlpha = 1;
+            });
+
+            // Particles
+            particles.forEach(p => {
+                ctx.fillStyle = COLOR_FG;
+                ctx.globalAlpha = (p.life / 30) * 0.8;
+                const size = p.type === 'explode' ? 3 : 2;
+                ctx.fillRect(Math.floor(p.x), Math.floor(p.y), size, size);
+            });
+            ctx.globalAlpha = 1;
+
+            // Signal trail
+            signal.trail.forEach((t, i) => {
+                ctx.fillStyle = COLOR_FG;
+                ctx.globalAlpha = (1 - t.age / 12) * 0.6;
+                const size = Math.floor(5 - (t.age / 12) * 4);
+                ctx.fillRect(Math.floor(t.x - size/2), Math.floor(t.y - size/2), size, size);
+            });
+            ctx.globalAlpha = 1;
+
+            // Signal
+            const pulse = Math.sin(frame * 0.25) * 1.5;
+            ctx.fillStyle = COLOR_FG;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = COLOR_FG;
+            ctx.beginPath();
+            ctx.arc(signal.x, signal.y, signal.radius + pulse * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(signal.x - 1, signal.y - 1, 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Echo rings
+            ctx.strokeStyle = COLOR_FG;
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 4; i++) {
+                const ringOffset = (frame * 2.5 + i * 15) % 60;
+                const alpha = 1 - (ringOffset / 60);
+                ctx.globalAlpha = alpha;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = COLOR_FG;
+                ctx.beginPath();
+                ctx.arc(signal.x, signal.y, signal.radius + 4 + ringOffset, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1;
+
+            // Scanline
+            const scanY = (frame * 2) % (canvas.height + 100) - 50;
+            ctx.strokeStyle = COLOR_FG;
+            ctx.globalAlpha = 0.15;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, scanY);
+            ctx.lineTo(canvas.width, scanY);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function gameOver() {
+            gameState = 'gameover';
+            gameContainer.classList.remove('playing');
+            
+            for (let i = 0; i < 25; i++) {
+                createParticle(signal.x, signal.y, 'explode');
+            }
+            
+            if (score > bestScore) {
+                bestScore = score;
+                try {
+                    localStorage.setItem('echo_best', bestScore);
+                } catch(e) {}
+                bestEl.textContent = bestScore;
+            }
+            
+            finalScoreEl.textContent = 'SKOR: ' + score;
+            gameOverScreen.classList.remove('hidden');
+        }
+
+        function startGame() {
+            init();
+            gameState = 'playing';
+            gameContainer.classList.add('playing');
+            startScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+        }
+
+        function setupButton(btn, isUp) {
+            const startHandler = (e) => {
+                e.preventDefault();
+                if (gameState === 'start' || gameState === 'gameover') {
+                    startGame();
+                    return;
+                }
+                btn.classList.add('active');
+                if (isUp) isUpPressed = true;
+                else isDownPressed = true;
+            };
+            
+            const endHandler = (e) => {
+                e.preventDefault();
+                btn.classList.remove('active');
+                if (isUp) isUpPressed = false;
+                else isDownPressed = false;
+            };
+            
+            btn.addEventListener('touchstart', startHandler, {passive: false});
+            btn.addEventListener('touchend', endHandler, {passive: false});
+            btn.addEventListener('touchcancel', endHandler, {passive: false});
+            btn.addEventListener('mousedown', startHandler);
+            btn.addEventListener('mouseup', endHandler);
+            btn.addEventListener('mouseleave', endHandler);
+        }
+
+        setupButton(btnUp, true);
+        setupButton(btnDown, false);
+
+        startScreen.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startGame();
+        }, {passive: false});
+        
+        startScreen.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            startGame();
+        });
+
+        gameOverScreen.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startGame();
+        }, {passive: false});
+        
+        gameOverScreen.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            startGame();
+        });
+
+        window.addEventListener('resize', () => {
+            resize();
+            if (gameState === 'start') {
+                init();
+            }
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.repeat) return;
+            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+                isUpPressed = true;
+                btnUp.classList.add('active');
+            } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+                isDownPressed = true;
+                btnDown.classList.add('active');
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+                isUpPressed = false;
+                btnUp.classList.remove('active');
+            } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+                isDownPressed = false;
+                btnDown.classList.remove('active');
+            }
+        });
+
+        init();
+        gameLoop();
+    </script>
+</body>
+</html>
