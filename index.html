@@ -4,31 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
-    <!-- Temel Meta -->
     <title>ECHO</title>
     <meta name="description" content="Derinliklerdeki sinyalini yönlendir ve engellerden kaçın - Designed by MSTYLDRM">
     <meta name="author" content="MSTYLDRM">
 
-    <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
-
-    <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180x180.png">
     <link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152x152.png">
     <link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon-120x120.png">
 
-    <!-- Apple Web App Meta -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ECHO">
 
-    <!-- Android/Chrome PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#001122">
     <meta name="mobile-web-app-capable" content="yes">
-
-    <!-- iOS Splash Screen -->
     <meta name="format-detection" content="telephone=no">
 
     <style>
@@ -43,31 +35,25 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        html {
+        html, body {
+            width: 100%;
             height: 100%;
             background: #000510;
+            overflow: hidden;
+            font-family: 'Courier New', monospace;
         }
 
         body {
-            background: #000510;
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 100vw;
-            height: 100vh;
-            height: -webkit-fill-available;
-            font-family: 'Courier New', monospace;
-            overflow: hidden;
-            padding: env(safe-area-inset-top) env(safe-area-inset-right) 
-                     env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
 
         #gameContainer {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            height: -webkit-fill-available;
+            width: 100%;
+            height: 100%;
             background: #001122;
+            position: relative;
             overflow: hidden;
         }
 
@@ -123,13 +109,13 @@
 
         #ui {
             position: absolute;
-            top: max(12px, env(safe-area-inset-top));
-            left: max(12px, env(safe-area-inset-left));
-            right: max(12px, env(safe-area-inset-right));
+            top: max(10px, env(safe-area-inset-top));
+            left: max(15px, env(safe-area-inset-left));
+            right: max(15px, env(safe-area-inset-right));
             display: flex;
             justify-content: space-between;
             color: #00ff88;
-            font-size: 11px;
+            font-size: clamp(10px, 3.5vw, 14px);
             font-weight: bold;
             z-index: 20;
             text-shadow: 0 0 10px rgba(0,255,136,0.8);
@@ -154,24 +140,24 @@
         }
 
         .logo {
-            width: min(90px, 20vw);
-            height: min(90px, 20vw);
-            margin-bottom: 20px;
+            width: min(120px, 30vw);
+            height: min(120px, 30vw);
+            margin-bottom: 30px;
             filter: drop-shadow(0 0 20px rgba(0,255,136,0.6));
         }
 
         h1 {
-            font-size: clamp(24px, 8vw, 32px);
-            letter-spacing: 12px;
-            margin-bottom: 8px;
+            font-size: clamp(36px, 12vw, 56px);
+            letter-spacing: 15px;
+            margin-bottom: 10px;
             text-shadow: 0 0 20px rgba(0,255,136,0.8);
             color: #00ff88;
         }
 
         .blink {
             animation: blink 1.5s infinite;
-            font-size: clamp(10px, 3vw, 12px);
-            margin-top: 30px;
+            font-size: clamp(12px, 4vw, 16px);
+            margin-top: 40px;
             letter-spacing: 3px;
             color: #00cc6a;
             text-align: center;
@@ -183,8 +169,8 @@
         }
 
         #finalScore {
-            font-size: clamp(16px, 5vw, 20px);
-            margin: 15px 0;
+            font-size: clamp(24px, 8vw, 32px);
+            margin: 20px 0;
             letter-spacing: 3px;
             color: #00ff88;
             text-shadow: 0 0 15px rgba(0,255,136,0.6);
@@ -196,19 +182,18 @@
 
         #controls {
             position: absolute;
-            bottom: max(25px, env(safe-area-inset-bottom));
-            left: 0;
-            right: 0;
+            bottom: max(40px, env(safe-area-inset-bottom) + 20px);
+            left: max(20px, env(safe-area-inset-left));
+            right: max(20px, env(safe-area-inset-right));
             display: flex;
             justify-content: space-between;
-            padding: 0 max(30px, env(safe-area-inset-left)) 0 max(30px, env(safe-area-inset-right));
             z-index: 25;
             pointer-events: none;
         }
 
         .control-btn {
-            width: clamp(55px, 15vw, 65px);
-            height: clamp(55px, 15vw, 65px);
+            width: clamp(70px, 20vw, 90px);
+            height: clamp(70px, 20vw, 90px);
             border-radius: 50%;
             background: rgba(0,255,136,0.08);
             border: 2px solid rgba(0,255,136,0.3);
@@ -239,29 +224,29 @@
         }
 
         #btnUp::before {
-            border-width: 0 10px 16px 10px;
+            border-width: 0 12px 20px 12px;
             border-color: transparent transparent #00ff88 transparent;
-            margin-top: -2px;
+            margin-top: -3px;
         }
 
         #btnDown::before {
-            border-width: 16px 10px 0 10px;
+            border-width: 20px 12px 0 12px;
             border-color: #00ff88 transparent transparent transparent;
-            margin-top: 2px;
+            margin-top: 3px;
         }
 
         .control-label {
             position: absolute;
-            bottom: -20px;
-            font-size: 8px;
+            bottom: -25px;
+            font-size: clamp(8px, 2.5vw, 10px);
             color: #00cc6a;
             opacity: 0.8;
             letter-spacing: 1px;
         }
 
         .instructions {
-            margin-top: 25px;
-            font-size: clamp(9px, 2.5vw, 10px);
+            margin-top: 30px;
+            font-size: clamp(11px, 3.5vw, 14px);
             text-align: center;
             line-height: 2;
             opacity: 0.7;
@@ -269,17 +254,20 @@
             color: #00cc6a;
         }
 
-        .credits {
+        /* Ekranın en altına küçük credits */
+        .credits-bottom {
             position: absolute;
-            bottom: max(100px, env(safe-area-inset-bottom) + 80px);
+            bottom: max(5px, env(safe-area-inset-bottom));
             left: 0;
             right: 0;
             text-align: center;
-            font-size: clamp(8px, 2vw, 9px);
-            color: #006644;
+            font-size: clamp(7px, 2vw, 9px);
+            color: #003322;
             letter-spacing: 2px;
-            z-index: 20;
+            z-index: 35;
             pointer-events: none;
+            font-weight: normal;
+            opacity: 0.6;
         }
 
         #touchOverlay {
@@ -287,21 +275,13 @@
             top: 0;
             left: 0;
             right: 0;
-            bottom: 100px;
+            bottom: 140px;
             z-index: 24;
             display: none;
         }
 
         .playing #touchOverlay {
             display: block;
-        }
-
-        @media (max-aspect-ratio: 9/16) {
-            #gameContainer {
-                aspect-ratio: 9/16;
-                height: 100vh;
-                max-width: none;
-            }
         }
     </style>
 </head>
@@ -322,7 +302,7 @@
                     <span class="control-label">AŞAĞI</span>
                 </div>
             </div>
-            <div class="credits">DESIGNED BY MSTYLDRM</div>
+            <div class="credits-bottom">DESIGNED BY MSTYLDRM</div>
             <div id="startScreen">
                 <svg class="logo" viewBox="0 0 100 100">
                     <rect width="100" height="100" fill="#001122" rx="10"/>
@@ -332,25 +312,23 @@
                     <circle cx="50" cy="50" r="46" fill="none" stroke="#00ff88" stroke-width="1.2" opacity="0.4"/>
                 </svg>
                 <h1>ECHO</h1>
-                <div style="font-size: 9px; opacity: 0.6; letter-spacing: 4px; color: #00cc6a;">DERİNLİK: 0m</div>
+                <div style="font-size: clamp(10px, 3vw, 12px); opacity: 0.6; letter-spacing: 4px; color: #00cc6a;">DERİNLİK: 0m</div>
                 <div class="blink">BAŞLAMAK İÇİN DOKUN</div>
                 <div class="instructions">
                     BUTONLARA BASILI TUT<br>
                     SİNYALİ YÖNLENDİR<br>
                     ENGELLERDEN KAÇIN
                 </div>
-                <div style="margin-top: 40px; font-size: 8px; color: #004433; letter-spacing: 3px;">DESIGNED BY MSTYLDRM</div>
             </div>
             <div id="gameOverScreen" class="hidden">
-                <svg class="logo" viewBox="0 0 100 100" style="width: 50px; height: 50px; opacity: 0.4;">
+                <svg class="logo" viewBox="0 0 100 100" style="width: min(80px, 20vw); height: min(80px, 20vw); opacity: 0.4;">
                     <circle cx="50" cy="50" r="6" fill="#00ff88"/>
                     <circle cx="50" cy="50" r="20" fill="none" stroke="#00ff88" stroke-width="2"/>
                     <circle cx="50" cy="50" r="34" fill="none" stroke="#00ff88" stroke-width="1.5" opacity="0.5"/>
                 </svg>
-                <h1 style="font-size: clamp(18px, 6vw, 22px); color: #ff4444; text-shadow: 0 0 20px rgba(255,68,68,0.6);">SİNYAL KAYIP</h1>
+                <h1 style="font-size: clamp(28px, 9vw, 40px); color: #ff4444; text-shadow: 0 0 20px rgba(255,68,68,0.6);">SİNYAL KAYIP</h1>
                 <div id="finalScore">SKOR: 0</div>
                 <div class="blink">TEKRAR İÇİN DOKUN</div>
-                <div style="margin-top: 30px; font-size: 8px; color: #004433; letter-spacing: 3px;">DESIGNED BY MSTYLDRM</div>
             </div>
         </div>
     </div>
@@ -388,9 +366,9 @@
         resize();
 
         const signal = {
-            x: 60,
+            x: 0,
             y: 0,
-            radius: 5,
+            radius: 6,
             targetY: 0,
             speed: 0,
             trail: []
@@ -399,12 +377,12 @@
         let obstacles = [];
         let particles = [];
         let frame = 0;
-        let gameSpeed = 2;
+        let gameSpeed = 2.5;
         let currentGap = 180;
         let lastObstacleX = 0;
         let difficultyLevel = 0;
-        let obstaclesInCurrentLevel = 0;
         let gridOffset = 0;
+        let lastGapY = 0;  // Son engelin pozisyonu
 
         let isUpPressed = false;
         let isDownPressed = false;
@@ -415,9 +393,15 @@
         const COLOR_FG_FAINT = '#006644';
         const COLOR_GRID = '#002233';
 
+        // Pozisyon limitleri - ekranın %25-%75 arası
+        function getGapLimits() {
+            const minPos = canvas.height * 0.25;
+            const maxPos = canvas.height * 0.65;
+            return { min: minPos, max: maxPos };
+        }
+
         function updateDifficulty() {
             const targetLevel = Math.floor(score / 10);
-
             if (targetLevel > difficultyLevel) {
                 difficultyLevel = targetLevel;
                 gameSpeed += 0.4;
@@ -426,6 +410,7 @@
         }
 
         function init() {
+            signal.x = canvas.width * 0.15;
             signal.y = canvas.height / 2;
             signal.targetY = signal.y;
             signal.speed = 0;
@@ -434,11 +419,11 @@
             particles = [];
             score = 0;
             frame = 0;
-            gameSpeed = 2;
+            gameSpeed = 2.5;
             currentGap = 180;
-            lastObstacleX = canvas.width + 100;
+            lastObstacleX = canvas.width + 50;
             difficultyLevel = 0;
-            obstaclesInCurrentLevel = 0;
+            lastGapY = canvas.height / 2;
             isUpPressed = false;
             isDownPressed = false;
 
@@ -450,16 +435,38 @@
         }
 
         function spawnObstacle(x) {
-            const gapHeight = 75 + Math.random() * 35;
-            const minY = 60;
-            const maxY = canvas.height - gapHeight - 60;
+            const gapHeight = 90 + Math.random() * 50;  // Biraz daha geniş açıklık
+            const limits = getGapLimits();
+
+            // Son pozisyona yakın ama rastgele - ani zıplamaları önle
+            let minY, maxY;
+
+            if (lastGapY === 0) {
+                // İlk engel - orta bölgede
+                minY = limits.min;
+                maxY = limits.max - gapHeight;
+            } else {
+                // Sonraki engeller - öncekinin yakınında (max %20 fark)
+                const maxJump = canvas.height * 0.20;  // Maksimum zıplama mesafesi
+                minY = Math.max(limits.min, lastGapY - maxJump);
+                maxY = Math.min(limits.max - gapHeight, lastGapY + maxJump);
+            }
+
+            // minY > maxY olmaması için kontrol
+            if (minY > maxY) {
+                const temp = (minY + maxY) / 2;
+                minY = temp - gapHeight/2;
+                maxY = temp;
+            }
+
             const gapY = minY + Math.random() * (maxY - minY);
+            lastGapY = gapY;  // Son pozisyonu kaydet
 
             obstacles.push({
                 x: x,
                 gapY: gapY,
                 gapHeight: gapHeight,
-                width: 16,
+                width: Math.max(14, canvas.width * 0.035),
                 passed: false,
                 waves: []
             });
@@ -471,8 +478,8 @@
             particles.push({
                 x: x,
                 y: y,
-                vx: (Math.random() - 0.5) * 2,
-                vy: (Math.random() - 0.5) * 2,
+                vx: (Math.random() - 0.5) * 3,
+                vy: (Math.random() - 0.5) * 3,
                 life: 20 + Math.random() * 10,
                 type: type
             });
@@ -484,13 +491,9 @@
             frame++;
             gridOffset -= gameSpeed;
 
-            const moveSpeed = 5;
-            if (isUpPressed) {
-                signal.targetY -= moveSpeed;
-            }
-            if (isDownPressed) {
-                signal.targetY += moveSpeed;
-            }
+            const moveSpeed = canvas.height * 0.012;
+            if (isUpPressed) signal.targetY -= moveSpeed;
+            if (isDownPressed) signal.targetY += moveSpeed;
 
             signal.targetY = Math.max(signal.radius + 10, Math.min(canvas.height - signal.radius - 10, signal.targetY));
 
@@ -547,7 +550,6 @@
                     if (obsRight < signalLeft) {
                         obs.passed = true;
                         score++;
-                        obstaclesInCurrentLevel++;
                         updateDifficulty();
                         scoreEl.textContent = score;
                     }
@@ -571,7 +573,7 @@
             ctx.lineWidth = 1;
             ctx.globalAlpha = 0.4;
 
-            const gridSize = 40;
+            const gridSize = Math.max(30, canvas.width * 0.08);
             const offset = gridOffset % gridSize;
 
             for (let x = offset; x < canvas.width; x += gridSize) {
@@ -592,7 +594,7 @@
 
             // Depth lines
             for (let i = 0; i < 5; i++) {
-                const y = (frame * 0.5 + i * 80) % canvas.height;
+                const y = (frame * 0.5 + i * (canvas.height / 5)) % canvas.height;
                 ctx.strokeStyle = COLOR_FG_FAINT;
                 ctx.globalAlpha = 0.1 * (1 - y / canvas.height);
                 ctx.lineWidth = 2;
@@ -605,7 +607,6 @@
 
             // Obstacles with gradient edges
             obstacles.forEach(obs => {
-                // Waves
                 obs.waves.forEach(w => {
                     ctx.strokeStyle = COLOR_FG;
                     ctx.globalAlpha = w.opacity * 0.5;
@@ -619,20 +620,19 @@
                 });
                 ctx.globalAlpha = 1;
 
-                // Create gradient for top block
+                // Gradient for top block
                 const topGradient = ctx.createLinearGradient(0, 0, 0, obs.gapY);
-                topGradient.addColorStop(0, 'rgba(0, 255, 136, 0.1)');
-                topGradient.addColorStop(0.3, COLOR_FG);
+                topGradient.addColorStop(0, 'rgba(0, 255, 136, 0.05)');
+                topGradient.addColorStop(0.4, COLOR_FG);
                 topGradient.addColorStop(1, COLOR_FG);
 
-                // Create gradient for bottom block
+                // Gradient for bottom block
                 const bottomStart = obs.gapY + obs.gapHeight;
                 const bottomGradient = ctx.createLinearGradient(0, bottomStart, 0, canvas.height);
                 bottomGradient.addColorStop(0, COLOR_FG);
-                bottomGradient.addColorStop(0.7, COLOR_FG);
-                bottomGradient.addColorStop(1, 'rgba(0, 255, 136, 0.1)');
+                bottomGradient.addColorStop(0.6, COLOR_FG);
+                bottomGradient.addColorStop(1, 'rgba(0, 255, 136, 0.05)');
 
-                // Draw blocks with gradients
                 ctx.fillStyle = topGradient;
                 ctx.shadowBlur = 10;
                 ctx.shadowColor = COLOR_FG;
@@ -645,14 +645,15 @@
                 // Pixel details
                 ctx.fillStyle = COLOR_BG;
                 ctx.globalAlpha = 0.3;
+                const detailSize = Math.max(2, canvas.width * 0.005);
                 for (let i = 4; i < obs.gapY - 4; i += 5) {
                     if (i % 10 === 4) {
-                        ctx.fillRect(obs.x + 3, i, obs.width - 6, 2);
+                        ctx.fillRect(obs.x + 3, i, obs.width - 6, detailSize);
                     }
                 }
                 for (let i = bottomStart + 4; i < canvas.height - 4; i += 5) {
                     if (i % 10 === 4) {
-                        ctx.fillRect(obs.x + 3, i, obs.width - 6, 2);
+                        ctx.fillRect(obs.x + 3, i, obs.width - 6, detailSize);
                     }
                 }
                 ctx.globalAlpha = 1;
@@ -662,7 +663,7 @@
             particles.forEach(p => {
                 ctx.fillStyle = COLOR_FG;
                 ctx.globalAlpha = (p.life / 30) * 0.8;
-                const size = p.type === 'explode' ? 3 : 2;
+                const size = p.type === 'explode' ? 4 : 2;
                 ctx.fillRect(Math.floor(p.x), Math.floor(p.y), size, size);
             });
             ctx.globalAlpha = 1;
@@ -671,15 +672,15 @@
             signal.trail.forEach((t, i) => {
                 ctx.fillStyle = COLOR_FG;
                 ctx.globalAlpha = (1 - t.age / 12) * 0.6;
-                const size = Math.floor(5 - (t.age / 12) * 4);
+                const size = Math.floor(6 - (t.age / 12) * 4);
                 ctx.fillRect(Math.floor(t.x - size/2), Math.floor(t.y - size/2), size, size);
             });
             ctx.globalAlpha = 1;
 
             // Signal
-            const pulse = Math.sin(frame * 0.25) * 1.5;
+            const pulse = Math.sin(frame * 0.25) * 2;
             ctx.fillStyle = COLOR_FG;
-            ctx.shadowBlur = 15;
+            ctx.shadowBlur = 20;
             ctx.shadowColor = COLOR_FG;
             ctx.beginPath();
             ctx.arc(signal.x, signal.y, signal.radius + pulse * 0.5, 0, Math.PI * 2);
@@ -688,30 +689,30 @@
 
             ctx.fillStyle = '#ffffff';
             ctx.beginPath();
-            ctx.arc(signal.x - 1, signal.y - 1, 2, 0, Math.PI * 2);
+            ctx.arc(signal.x - 1, signal.y - 1, 2.5, 0, Math.PI * 2);
             ctx.fill();
 
             // Echo rings
             ctx.strokeStyle = COLOR_FG;
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 2.5;
             for (let i = 0; i < 4; i++) {
-                const ringOffset = (frame * 2.5 + i * 15) % 60;
-                const alpha = 1 - (ringOffset / 60);
+                const ringOffset = (frame * 3 + i * 18) % (canvas.width * 0.15);
+                const alpha = 1 - (ringOffset / (canvas.width * 0.15));
                 ctx.globalAlpha = alpha;
-                ctx.shadowBlur = 10;
+                ctx.shadowBlur = 15;
                 ctx.shadowColor = COLOR_FG;
                 ctx.beginPath();
-                ctx.arc(signal.x, signal.y, signal.radius + 4 + ringOffset, 0, Math.PI * 2);
+                ctx.arc(signal.x, signal.y, signal.radius + 6 + ringOffset, 0, Math.PI * 2);
                 ctx.stroke();
             }
             ctx.shadowBlur = 0;
             ctx.globalAlpha = 1;
 
             // Scanline
-            const scanY = (frame * 2) % (canvas.height + 100) - 50;
+            const scanY = (frame * 3) % (canvas.height + 100) - 50;
             ctx.strokeStyle = COLOR_FG;
-            ctx.globalAlpha = 0.15;
-            ctx.lineWidth = 3;
+            ctx.globalAlpha = 0.12;
+            ctx.lineWidth = 4;
             ctx.beginPath();
             ctx.moveTo(0, scanY);
             ctx.lineTo(canvas.width, scanY);
@@ -729,7 +730,7 @@
             gameState = 'gameover';
             gameContainer.classList.remove('playing');
 
-            for (let i = 0; i < 25; i++) {
+            for (let i = 0; i < 30; i++) {
                 createParticle(signal.x, signal.y, 'explode');
             }
 
@@ -746,6 +747,7 @@
         }
 
         function startGame() {
+            resize();
             init();
             gameState = 'playing';
             gameContainer.classList.add('playing');
@@ -805,8 +807,8 @@
 
         window.addEventListener('resize', () => {
             resize();
-            if (gameState === 'start') {
-                init();
+            if (gameState === 'playing') {
+                signal.x = canvas.width * 0.15;
             }
         });
 

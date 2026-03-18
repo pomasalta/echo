@@ -2,7 +2,8 @@
   "name": "ECHO - Sonar Sinyali",
   "short_name": "ECHO",
   "description": "Derinliklerdeki sinyalini yönlendir ve engellerden kaçın - Designed by MSTYLDRM",
-  "start_url": "/",
+  "start_url": ".",
+  "scope": ".",
   "display": "standalone",
   "background_color": "#000d1a",
   "theme_color": "#001122",
@@ -12,18 +13,19 @@
       "src": "maskable-icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "maskable any"
     },
     {
       "src": "maskable-icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "maskable any"
     },
     {
       "src": "apple-touch-icon-180x180.png",
       "sizes": "180x180",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
   "categories": [
