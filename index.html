@@ -168,12 +168,32 @@
             51%, 100% { opacity: 0.3; text-shadow: none; }
         }
 
-        #finalScore {
-            font-size: clamp(24px, 8vw, 32px);
-            margin: 20px 0;
-            letter-spacing: 3px;
+        /* Oyun Bitti Ekranı - Yeni Tasarım */
+        .game-over-title {
+            font-size: clamp(20px, 6vw, 28px);
+            color: #ff4444;
+            text-shadow: 0 0 30px rgba(255,68,68,0.8);
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .final-score-big {
+            font-size: clamp(64px, 20vw, 120px);
             color: #00ff88;
-            text-shadow: 0 0 15px rgba(0,255,136,0.6);
+            text-shadow: 0 0 40px rgba(0,255,136,0.9);
+            letter-spacing: 8px;
+            font-weight: bold;
+            line-height: 1;
+            margin: 10px 0;
+        }
+
+        .high-score-display {
+            font-size: clamp(14px, 4vw, 18px);
+            color: #00cc6a;
+            letter-spacing: 3px;
+            margin-top: 15px;
+            opacity: 0.9;
         }
 
         .hidden {
@@ -254,7 +274,6 @@
             color: #00cc6a;
         }
 
-        /* Ekranın en altına küçük credits */
         .credits-bottom {
             position: absolute;
             bottom: max(5px, env(safe-area-inset-bottom));
@@ -321,14 +340,10 @@
                 </div>
             </div>
             <div id="gameOverScreen" class="hidden">
-                <svg class="logo" viewBox="0 0 100 100" style="width: min(80px, 20vw); height: min(80px, 20vw); opacity: 0.4;">
-                    <circle cx="50" cy="50" r="6" fill="#00ff88"/>
-                    <circle cx="50" cy="50" r="20" fill="none" stroke="#00ff88" stroke-width="2"/>
-                    <circle cx="50" cy="50" r="34" fill="none" stroke="#00ff88" stroke-width="1.5" opacity="0.5"/>
-                </svg>
-                <h1 style="font-size: clamp(28px, 9vw, 40px); color: #ff4444; text-shadow: 0 0 20px rgba(255,68,68,0.6);">SİNYAL KAYIP</h1>
-                <div id="finalScore">SKOR: 0</div>
-                <div class="blink">TEKRAR İÇİN DOKUN</div>
+                <div class="game-over-title">SİNYAL KAYBOLDU</div>
+                <div class="final-score-big" id="finalScoreBig">0</div>
+                <div class="high-score-display" id="highScoreDisplay">REKOR: 0</div>
+                <div class="blink" style="margin-top: 50px;">TEKRAR İÇİN DOKUN</div>
             </div>
         </div>
     </div>
@@ -341,7 +356,8 @@
         const bestEl = document.getElementById('best');
         const startScreen = document.getElementById('startScreen');
         const gameOverScreen = document.getElementById('gameOverScreen');
-        const finalScoreEl = document.getElementById('finalScore');
+        const finalScoreBig = document.getElementById('finalScoreBig');
+        const highScoreDisplay = document.getElementById('highScoreDisplay');
         const btnUp = document.getElementById('btnUp');
         const btnDown = document.getElementById('btnDown');
         const gameContainer = document.getElementById('gameContainer');
@@ -382,7 +398,6 @@
         let lastObstacleX = 0;
         let difficultyLevel = 0;
         let gridOffset = 0;
-        let lastGapY = 0;  // Son engelin pozisyonu
 
         let isUpPressed = false;
         let isDownPressed = false;
@@ -393,19 +408,15 @@
         const COLOR_FG_FAINT = '#006644';
         const COLOR_GRID = '#002233';
 
-        // Pozisyon limitleri - ekranın %25-%75 arası
-        function getGapLimits() {
-            const minPos = canvas.height * 0.25;
-            const maxPos = canvas.height * 0.65;
-            return { min: minPos, max: maxPos };
-        }
+        // Dalga çemberleri için ahenkli animasyon
+        let ringPhase = 0;
 
         function updateDifficulty() {
             const targetLevel = Math.floor(score / 10);
             if (targetLevel > difficultyLevel) {
                 difficultyLevel = targetLevel;
                 gameSpeed += 0.4;
-                currentGap = Math.max(100, 180 - (difficultyLevel * 12));
+                currentGap = Math.max(85, 180 - (difficultyLevel * 12));
             }
         }
 
@@ -423,7 +434,7 @@
             currentGap = 180;
             lastObstacleX = canvas.width + 50;
             difficultyLevel = 0;
-            lastGapY = canvas.height / 2;
+            ringPhase = 0;
             isUpPressed = false;
             isDownPressed = false;
 
@@ -435,32 +446,11 @@
         }
 
         function spawnObstacle(x) {
-            const gapHeight = 90 + Math.random() * 50;  // Biraz daha geniş açıklık
-            const limits = getGapLimits();
-
-            // Son pozisyona yakın ama rastgele - ani zıplamaları önle
-            let minY, maxY;
-
-            if (lastGapY === 0) {
-                // İlk engel - orta bölgede
-                minY = limits.min;
-                maxY = limits.max - gapHeight;
-            } else {
-                // Sonraki engeller - öncekinin yakınında (max %20 fark)
-                const maxJump = canvas.height * 0.20;  // Maksimum zıplama mesafesi
-                minY = Math.max(limits.min, lastGapY - maxJump);
-                maxY = Math.min(limits.max - gapHeight, lastGapY + maxJump);
-            }
-
-            // minY > maxY olmaması için kontrol
-            if (minY > maxY) {
-                const temp = (minY + maxY) / 2;
-                minY = temp - gapHeight/2;
-                maxY = temp;
-            }
-
+            const gapHeight = 85 + Math.random() * 45;
+            // %10 limit - ekranın %10'u üstten ve %10'u alttan kapalı
+            const minY = canvas.height * 0.10;
+            const maxY = canvas.height - gapHeight - canvas.height * 0.10;
             const gapY = minY + Math.random() * (maxY - minY);
-            lastGapY = gapY;  // Son pozisyonu kaydet
 
             obstacles.push({
                 x: x,
@@ -489,11 +479,17 @@
             if (gameState !== 'playing') return;
 
             frame++;
+            ringPhase += 0.08;  // Düzenli dalga hızı
             gridOffset -= gameSpeed;
 
-            const moveSpeed = canvas.height * 0.012;
-            if (isUpPressed) signal.targetY -= moveSpeed;
-            if (isDownPressed) signal.targetY += moveSpeed;
+            // Tuş kontrolü - sürekli basılı tutma
+            const moveSpeed = canvas.height * 0.014;
+            if (isUpPressed) {
+                signal.targetY -= moveSpeed;
+            }
+            if (isDownPressed) {
+                signal.targetY += moveSpeed;
+            }
 
             signal.targetY = Math.max(signal.radius + 10, Math.min(canvas.height - signal.radius - 10, signal.targetY));
 
@@ -605,7 +601,7 @@
             }
             ctx.globalAlpha = 1;
 
-            // Obstacles with gradient edges
+            // Obstacles
             obstacles.forEach(obs => {
                 obs.waves.forEach(w => {
                     ctx.strokeStyle = COLOR_FG;
@@ -620,13 +616,11 @@
                 });
                 ctx.globalAlpha = 1;
 
-                // Gradient for top block
                 const topGradient = ctx.createLinearGradient(0, 0, 0, obs.gapY);
                 topGradient.addColorStop(0, 'rgba(0, 255, 136, 0.05)');
                 topGradient.addColorStop(0.4, COLOR_FG);
                 topGradient.addColorStop(1, COLOR_FG);
 
-                // Gradient for bottom block
                 const bottomStart = obs.gapY + obs.gapHeight;
                 const bottomGradient = ctx.createLinearGradient(0, bottomStart, 0, canvas.height);
                 bottomGradient.addColorStop(0, COLOR_FG);
@@ -642,7 +636,6 @@
                 ctx.fillRect(obs.x, bottomStart, obs.width, canvas.height - bottomStart);
                 ctx.shadowBlur = 0;
 
-                // Pixel details
                 ctx.fillStyle = COLOR_BG;
                 ctx.globalAlpha = 0.3;
                 const detailSize = Math.max(2, canvas.width * 0.005);
@@ -677,7 +670,7 @@
             });
             ctx.globalAlpha = 1;
 
-            // Signal
+            // Signal body
             const pulse = Math.sin(frame * 0.25) * 2;
             ctx.fillStyle = COLOR_FG;
             ctx.shadowBlur = 20;
@@ -692,17 +685,27 @@
             ctx.arc(signal.x - 1, signal.y - 1, 2.5, 0, Math.PI * 2);
             ctx.fill();
 
-            // Echo rings
+            // AHENKLİ Dalga çemberleri - düzenli sinüs dalgası
             ctx.strokeStyle = COLOR_FG;
             ctx.lineWidth = 2.5;
-            for (let i = 0; i < 4; i++) {
-                const ringOffset = (frame * 3 + i * 18) % (canvas.width * 0.15);
-                const alpha = 1 - (ringOffset / (canvas.width * 0.15));
+
+            // 3 dalga, her biri 120 derece (2π/3) faz farklı
+            const baseRadius = signal.radius + 8;
+            const maxRadius = canvas.width * 0.12;
+
+            for (let i = 0; i < 3; i++) {
+                // Her dalga için faz hesabı - düzenli periyot
+                const phase = (ringPhase + (i * Math.PI * 2 / 3)) % (Math.PI * 2);
+                // Sinüs fonksiyonu ile 0-1 arası değer
+                const normalized = (Math.sin(phase) + 1) / 2;
+                const ringRadius = baseRadius + (normalized * maxRadius);
+                const alpha = 0.3 + (normalized * 0.7);  // Merkeze yakın opak, uzakta soluk
+
                 ctx.globalAlpha = alpha;
                 ctx.shadowBlur = 15;
                 ctx.shadowColor = COLOR_FG;
                 ctx.beginPath();
-                ctx.arc(signal.x, signal.y, signal.radius + 6 + ringOffset, 0, Math.PI * 2);
+                ctx.arc(signal.x, signal.y, ringRadius, 0, Math.PI * 2);
                 ctx.stroke();
             }
             ctx.shadowBlur = 0;
@@ -734,15 +737,21 @@
                 createParticle(signal.x, signal.y, 'explode');
             }
 
+            // Yeni oyun bitti ekranı
+            finalScoreBig.textContent = score;
             if (score > bestScore) {
                 bestScore = score;
                 try {
                     localStorage.setItem('echo_best', bestScore);
                 } catch(e) {}
                 bestEl.textContent = bestScore;
+                highScoreDisplay.textContent = 'YENİ REKOR!';
+                highScoreDisplay.style.color = '#ffaa00';
+            } else {
+                highScoreDisplay.textContent = 'REKOR: ' + bestScore;
+                highScoreDisplay.style.color = '#00cc6a';
             }
 
-            finalScoreEl.textContent = 'SKOR: ' + score;
             gameOverScreen.classList.remove('hidden');
         }
 
@@ -755,28 +764,43 @@
             gameOverScreen.classList.add('hidden');
         }
 
+        // Tuş kontrolü - takılma sorunu çözümü
         function setupButton(btn, isUp) {
             const startHandler = (e) => {
                 e.preventDefault();
+                e.stopPropagation();
+
                 if (gameState === 'start' || gameState === 'gameover') {
                     startGame();
                     return;
                 }
+
                 btn.classList.add('active');
-                if (isUp) isUpPressed = true;
-                else isDownPressed = true;
+                if (isUp) {
+                    isUpPressed = true;
+                    isDownPressed = false;  // Karşı tuşu sıfırla
+                    btnDown.classList.remove('active');
+                } else {
+                    isDownPressed = true;
+                    isUpPressed = false;  // Karşı tuşu sıfırla
+                    btnUp.classList.remove('active');
+                }
             };
 
             const endHandler = (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 btn.classList.remove('active');
                 if (isUp) isUpPressed = false;
                 else isDownPressed = false;
             };
 
+            // Touch events
             btn.addEventListener('touchstart', startHandler, {passive: false});
             btn.addEventListener('touchend', endHandler, {passive: false});
             btn.addEventListener('touchcancel', endHandler, {passive: false});
+
+            // Mouse events
             btn.addEventListener('mousedown', startHandler);
             btn.addEventListener('mouseup', endHandler);
             btn.addEventListener('mouseleave', endHandler);
@@ -812,14 +836,20 @@
             }
         });
 
+        // Klavye kontrolü - takılma çözümü
         window.addEventListener('keydown', (e) => {
             if (e.repeat) return;
+
             if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
                 isUpPressed = true;
+                isDownPressed = false;  // Karşıyı kapat
                 btnUp.classList.add('active');
+                btnDown.classList.remove('active');
             } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
                 isDownPressed = true;
+                isUpPressed = false;  // Karşıyı kapat
                 btnDown.classList.add('active');
+                btnUp.classList.remove('active');
             }
         });
 
